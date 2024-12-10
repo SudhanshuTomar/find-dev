@@ -3,6 +3,7 @@ const connectDb = require('./config/database');
 const app = express();
 
 const user = require('./models/user');
+app.use(express.json());
 
 connectDb().then(() => {
     console.log('Database connected');
@@ -14,19 +15,42 @@ connectDb().then(() => {
 });
 
 app.post('/signup',async(req,res) =>{
-    const obj = new user(
-        {
-            firstName:'John',
-            lastName:'Doe',
-            email:'john.doe@gmail.com',
-            passsword:'password'
-        }
-    )
+    const userdata = req.body;
+    // const obj = new user(
+    //     {
+    //         "firstName": "John",
+        // "lastName": "Doe",
+        // "email": "john.doe@gmail.com",
+    //         "passsword":"password"
+    //     }
+    // )
+    console.log(userdata);
+    const obj = new user(userdata);
     await obj.save();
     res.send('User created');
+});
+
+app.get('/getAllUser',async(req,res) =>{
+    const userreq = req.body;
+    const user1 = await user.find({});
+    console.log(user1);
+    res.send(user1);
 })
-
-
-// app.listen(3000, () => {
-//     console.log('Server is running on port 3000');
-// });
+app.get('/getUserByEmail',async(req,res) =>{
+    const userreq = req.body;
+    const user1 = await user.find(userreq);
+    console.log(user1);
+    res.send(user1);
+})
+app.delete('/deleteUserByEmail',async(req,res) =>{
+    const userreq = req.body;
+    const user1 = await user.findOneAndDelete(userreq);
+    console.log(user1);
+    res.send(user1);
+})
+app.patch('/updateUserByEmail',async(req,res) =>{
+    const {email,name} = req.body;
+    const user1 = await user.findOneAndUpdate({email:email},{firstName:name})
+    console.log(user1);
+    res.send(user1);
+});
