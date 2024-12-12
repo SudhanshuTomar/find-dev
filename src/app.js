@@ -50,7 +50,25 @@ app.delete('/deleteUserByEmail',async(req,res) =>{
 })
 app.patch('/updateUserByEmail',async(req,res) =>{
     const {email,name} = req.body;
-    const user1 = await user.findOneAndUpdate({email:email},{firstName:name})
-    console.log(user1);
-    res.send(user1);
+    const allowedUpdates = ['firstName','lastName'];
+    
+    try{
+        const updates = Object.keys(req.body);
+        console.log(updates);
+        if(!updates.every((update) => allowedUpdates.includes(update))){
+            return res.status(400).send({error:'Invalid updates'});
+        }
+        const user1 = await user.findOneAndUpdate({email:email},{firstName:name},
+            {
+            returnDocument:'after',
+            runValidators:true
+        });
+        console.log(user1);
+        res.send(user1);
+    }
+    catch(e){
+        console.log(e);
+        res.send("some error occured" + e);
+    }
+    
 });
